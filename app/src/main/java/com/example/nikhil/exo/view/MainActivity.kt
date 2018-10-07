@@ -1,26 +1,16 @@
 package com.example.nikhil.exo.view
 
-import android.content.ComponentName
-import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import com.example.nikhil.exo.R
+import com.example.nikhil.exo.presenter.MediaPresenter
 import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-import com.google.android.exoplayer2.source.ExtractorMediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
 
 class MainActivity : AppCompatActivity() {
 
+    private var mediaPresenter: MediaPresenter = MediaPresenter(this)
     private var exoplayerView : SimpleExoPlayerView? = null
-    private var exoplayer : SimpleExoPlayer? = null
-    private var playbackStateBuilder : PlaybackStateCompat.Builder? = null
-    private var mediaSession: MediaSessionCompat? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,26 +21,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initializePlayer() {
-        val trackSelector = DefaultTrackSelector()
-        exoplayer = ExoPlayerFactory.newSimpleInstance(baseContext, trackSelector)
-        exoplayerView?.player = exoplayer
+        mediaPresenter.prepareExoPlayer()
+    }
 
-        val userAgent = Util.getUserAgent(baseContext, "Exo")
-        val mediaUri = Uri.parse("asset:///heart_attack.mp3")
-        val mediaSource = ExtractorMediaSource(mediaUri, DefaultDataSourceFactory(baseContext, userAgent), DefaultExtractorsFactory(), null, null)
-
-        exoplayer?.prepare(mediaSource)
-
-        val componentName = ComponentName(baseContext, "Exo")
-        mediaSession = MediaSessionCompat(baseContext, "ExoPlayer", componentName, null)
-
-        playbackStateBuilder = PlaybackStateCompat.Builder()
-
-        playbackStateBuilder?.setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
-                                            PlaybackStateCompat.ACTION_FAST_FORWARD)
-
-        mediaSession?.setPlaybackState(playbackStateBuilder?.build())
-        mediaSession?.isActive = true
+    fun setExoPlayer(exoPlayer: SimpleExoPlayer?) {
+        exoplayerView?.player = exoPlayer
     }
 //
 //    override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {
@@ -90,14 +65,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        releasePlayer()
-    }
-
-    private fun releasePlayer() {
-        if (exoplayer != null) {
-            exoplayer?.stop()
-            exoplayer?.release()
-            exoplayer = null
-        }
+        mediaPresenter.releasePlayer()
     }
 }

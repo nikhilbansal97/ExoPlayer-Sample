@@ -1,3 +1,5 @@
 package com.example.nikhil.exo.model
 
-class Media (var uri: String)
+import android.net.Uri
+
+class Media (var uri: Uri)
