@@ -1,0 +1,12 @@
+ext.versions = [
+        COMPILE_SDK_VERSION : 29,
+        MIN_SDK_VERSION : 26,
+        TARGET_SDK_VERSION : 29,
+        APPCOMPAT : "1.3.0",
+        CONSTRAINT_LAYOUT : "2.0.4",
+        EXOPLAYER : "2.14.0",
+
+        JUNIT : "4.13.2",
+        ANDROIDX_JUNIT : "1.1.2",
+        ESPRESSO : "3.3.0"
+]

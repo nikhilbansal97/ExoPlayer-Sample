@@ -1,94 +1,40 @@
 package com.example.nikhil.exo
 
-import android.content.ComponentName
 import android.net.Uri
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.MediaStore
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-import com.google.android.exoplayer2.source.ExtractorMediaSource
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import android.view.LayoutInflater
+import androidx.appcompat.app.AppCompatActivity
+import com.example.nikhil.exo.databinding.ActivityMainBinding
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SimpleExoPlayer
 
 class MainActivity : AppCompatActivity() {
 
-    private var exoplayerView : SimpleExoPlayerView? = null
-    private var exoplayer : SimpleExoPlayer? = null
-    private var playbackStateBuilder : PlaybackStateCompat.Builder? = null
-    private var mediaSession: MediaSessionCompat? = null
+    private lateinit var exoplayer : SimpleExoPlayer
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(LayoutInflater.from(this))
+        setContentView(binding.root)
 
-        exoplayerView = findViewById(R.id.simpleExoPlayerView)
         initializePlayer()
     }
 
     private fun initializePlayer() {
-        val trackSelector = DefaultTrackSelector()
-        exoplayer = ExoPlayerFactory.newSimpleInstance(baseContext, trackSelector)
-        exoplayerView?.player = exoplayer
+        // Initialize ExoPlayer
+        exoplayer = SimpleExoPlayer.Builder(this)
+            .build()
+        binding.playerView.player = exoplayer
 
-        val userAgent = Util.getUserAgent(baseContext, "Exo")
+        // Create a MediaItem
         val mediaUri = Uri.parse("asset:///heart_attack.mp3")
-        val mediaSource = ExtractorMediaSource(mediaUri, DefaultDataSourceFactory(baseContext, userAgent), DefaultExtractorsFactory(), null, null)
+        val mediaItem = MediaItem.fromUri(mediaUri)
 
-        exoplayer?.prepare(mediaSource)
-
-        val componentName = ComponentName(baseContext, "Exo")
-        mediaSession = MediaSessionCompat(baseContext, "ExoPlayer", componentName, null)
-
-        playbackStateBuilder = PlaybackStateCompat.Builder()
-
-        playbackStateBuilder?.setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
-                                            PlaybackStateCompat.ACTION_FAST_FORWARD)
-
-        mediaSession?.setPlaybackState(playbackStateBuilder?.build())
-        mediaSession?.isActive = true
+        exoplayer.addMediaItem(mediaItem)
+        exoplayer.prepare()
+        exoplayer.play()
     }
-//
-//    override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters?) {
-//    }
-//
-//    override fun onSeekProcessed() {
-//    }
-//
-//    override fun onTracksChanged(trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {
-//    }
-//
-//    override fun onPlayerError(error: ExoPlaybackException?) {
-//    }
-//
-//    override fun onLoadingChanged(isLoading: Boolean) {
-//    }
-//
-//    override fun onPositionDiscontinuity(reason: Int) {
-//    }
-//
-//    override fun onRepeatModeChanged(repeatMode: Int) {
-//    }
-//
-//    override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
-//    }
-//
-//    override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {
-//    }
-//
-//    override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-//        if (playWhenReady)
-//            playbackStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, exoplayer?.currentPosition!!, 1f)
-//        else
-//            playbackStateBuilder?.setState(PlaybackStateCompat.STATE_PAUSED, exoplayer?.currentPosition!!, 1f)
-//        mediaSession?.setPlaybackState(playbackStateBuilder?.build())
-//    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -96,10 +42,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun releasePlayer() {
-        if (exoplayer != null) {
-            exoplayer?.stop()
-            exoplayer?.release()
-            exoplayer = null
-        }
+        exoplayer.stop()
+        exoplayer.release()
     }
 }
